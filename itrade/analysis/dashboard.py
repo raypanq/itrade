@@ -11,8 +11,6 @@ from ..model import SymbolStr
 from functools import reduce
 from . import FeeCalculable, Analyzable
 
-_MIN_UNIT = Decimal(0.01*pow(10,5)) #0.01 Lot
-
 class _Transaction:
     def __init__(self,
                  from_candle_open_sec: float,
@@ -29,11 +27,11 @@ class _Transaction:
         self.price = price
         self.tp = tp
         self.sl = sl
-        self.unit = Decimal(0.0)
-        self.used_margin_usd = Decimal(0.0)
+        self.unit = Decimal(0)
+        self.used_margin_usd = Decimal(0)
         self.symstr = symstr
-        self.risk_amt_usd = Decimal(0.0)
-        self.order_amt_usd = Decimal(0.0)
+        self.risk_amt_usd = Decimal(0)
+        self.order_amt_usd = Decimal(0)
 
     @property
     def is_sell(self) ->bool:
@@ -208,7 +206,7 @@ class Dashboard:
                                                          init_balance_usd:Decimal, 
                                                          leverage:Decimal) -> tuple:
         balance_usd = init_balance_usd
-        used_margin_usd = Decimal(0.0)
+        used_margin_usd = Decimal(0)
         min_risk_amt_usd = init_balance_usd * risk_perc
         time_balance_usedmargin_list:list[tuple] = [] # for drawing line chart
         tp_cnt = 0
@@ -271,8 +269,6 @@ class Dashboard:
                             # 下单
                             risk_amt_quote = risk_amt_usd if tran.symstr.quote == 'usd' else risk_amt_usd * tran.price
                             unit = risk_amt_quote / abs(tran.sl - tran.price)
-                            unit = (unit//_MIN_UNIT)*_MIN_UNIT
-                            unit = max(_MIN_UNIT, unit)
                             order_amt_quote = unit * tran.price
                             order_amt_usd = order_amt_quote if tran.symstr.quote == 'usd' else order_amt_quote / tran.price
                             order_used_margin_usd = order_amt_usd / leverage
