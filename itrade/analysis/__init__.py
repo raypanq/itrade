@@ -6,20 +6,18 @@ from ..model import SymbolStr
 from decimal import Decimal
 
 class Analyzable(Protocol):
-    @staticmethod
     def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle]) -> list[Signal]:
         pass
 
 class ChiefAnalyzable(Protocol):
-    @staticmethod
     def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle], analyst_list:list[Analyzable]) -> list[Signal]:
         pass
 
-class IFeeCalculable(Protocol):
-    def get_commission_fee(self, order_amt_usd: Decimal) -> Decimal:
+class FeeCalculable(Protocol):
+    def get_commission_fee(order_amt_usd: Decimal) -> Decimal:
         pass
         
-    def get_swap_fee(self, symstr:SymbolStr, lot:Decimal, from_sec:float, to_sec:float, is_buy:bool) -> Decimal:
+    def get_swap_fee(symstr:SymbolStr, lot:Decimal, from_sec:float, to_sec:float, is_buy:bool) -> Decimal:
         pass
 
 def get_emas(num_list: list[Decimal], win:int) -> list[Decimal]:
@@ -51,7 +49,6 @@ def get_rsis(num_list:list[Decimal], win:int) -> list[Decimal]:
     rsi = 100 - (100 / (1 + rs))
 
     return list(rsi)
-
 
 def get_peaks_valleys(candle_list: list[Candle]) -> tuple[set[Candle], set[Candle]]:
     # peaks and valleys

@@ -10,7 +10,7 @@ from .. import del_Decimal_tail, utc_date
 from ..model import SymbolStr
 from ..analysis import IAnalyzable
 from functools import reduce
-from . import IFeeCalculable
+from . import FeeCalculable
 
 _MIN_UNIT = 0.01*pow(10,5) #0.01 Lot
 
@@ -46,7 +46,7 @@ class _Transaction:
 
 class Dashboard:
 
-    def __init__(self, fee_calc:IFeeCalculable):
+    def __init__(self, fee_calc:FeeCalculable):
         self._fee_calc = fee_calc
 
     '''
