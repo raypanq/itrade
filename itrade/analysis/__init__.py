@@ -2,30 +2,31 @@ import pandas as pd
 from ..model.candle import Candle
 from ..model.signal import Signal
 from typing import Protocol
-from src.model import SymbolStr
+from ..model import SymbolStr
+from decimal import Decimal
 
-class IAnalyzable(Protocol):
+class Analyzable(Protocol):
     @staticmethod
     def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle]) -> list[Signal]:
         pass
 
-class IChiefAnalyzable(Protocol):
+class ChiefAnalyzable(Protocol):
     @staticmethod
-    def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle], analyst_list:list[IAnalyzable]) -> list[Signal]:
+    def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle], analyst_list:list[Analyzable]) -> list[Signal]:
         pass
 
 class IFeeCalculable(Protocol):
-    def get_commission_fee(self, order_amt_usd: float) -> float:
+    def get_commission_fee(self, order_amt_usd: Decimal) -> Decimal:
         pass
         
-    def get_swap_fee(self, symstr:SymbolStr, lot:float, from_sec:int, to_sec:int, is_buy:bool) -> float:
+    def get_swap_fee(self, symstr:SymbolStr, lot:Decimal, from_sec:float, to_sec:float, is_buy:bool) -> Decimal:
         pass
 
-def get_emas(num_list: list[float], win:int) -> list[float]:
+def get_emas(num_list: list[Decimal], win:int) -> list[Decimal]:
     ema_series = pd.Series(num_list).ewm(span=win, adjust=False).mean()
     return list(ema_series)
 
-def get_atrs(h_list: list[float], l_list: list[float], c_list: list[float], win=int) -> list[float]:
+def get_atrs(h_list: list[Decimal], l_list: list[Decimal], c_list: list[Decimal], win=int) -> list[Decimal]:
     df = pd.DataFrame(dict(
         h=h_list,
         l=l_list,
@@ -37,7 +38,7 @@ def get_atrs(h_list: list[float], l_list: list[float], c_list: list[float], win=
     df['tr'] = df[['h-l', 'h-prev_c', 'l-prev_c']].max(axis=1)
     return list(df.tr.ewm(span=win, adjust=False).mean())
 
-def get_rsis(num_list:list[float], win:int) -> list[float]:
+def get_rsis(num_list:list[Decimal], win:int) -> list[Decimal]:
     series = pd.Series(num_list)
     delta = series.diff()
     gain = (delta.where(delta > 0, 0)).fillna(0)

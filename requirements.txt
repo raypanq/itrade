@@ -1,0 +1,5 @@
+tortoise-orm
+pandas
+websockets
+setuptools
+plotly

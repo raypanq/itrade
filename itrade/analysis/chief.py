@@ -1,11 +1,11 @@
-from src.model.candle import Candle
-from src.model.signal import Signal
-from . import IChiefAnalyzable, IAnalyzable
+from ..model.candle import Candle
+from ..model.signal import Signal
+from . import ChiefAnalyzable, Analyzable
 
-class ChiefAnalyst(IChiefAnalyzable):
+class Chief(ChiefAnalyzable):
 
     @staticmethod
-    def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle], analyst_list:list[IAnalyzable]) -> list[Signal]:
+    def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle], analyst_list:list[Analyzable]) -> list[Signal]:
         if (not candle_list) or (not analyst_list):
             return []
         symstr = candle_list[0].symstr

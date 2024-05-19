@@ -2,12 +2,13 @@ from ..model.candle import Candle, STRTIME_FMT
 from ..model.signal import Signal
 from plotly import graph_objects as go
 from plotly.subplots import make_subplots
+from decimal import Decimal
 import pandas as pd
 from . import get_emas, get_peaks_valleys, get_atrs
 from . import get_rsis
-from src import del_float_tail, utc_date, utc_now
-from src.model import SymbolStr, CandlePeriod
-from src.analysis import IAnalyzable
+from .. import del_Decimal_tail, utc_date, utc_now
+from ..model import SymbolStr, CandlePeriod
+from ..analysis import IAnalyzable
 import asyncio
 from asyncio import Future as AsyncFuture
 from functools import reduce
@@ -17,12 +18,12 @@ _MIN_UNIT = 0.01*pow(10,5) #0.01 Lot
 
 class _Transaction:
     def __init__(self,
-                 from_candle_open_sec: int,
-                 to_candle_open_sec: int,
+                 from_candle_open_sec: float,
+                 to_candle_open_sec: float,
                  is_buy: bool,
-                 price: float,
-                 tp: float,
-                 sl: float,
+                 price: Decimal,
+                 tp: Decimal,
+                 sl: Decimal,
                  symstr: SymbolStr):
         self.from_candle_open_sec = from_candle_open_sec
         self.to_candle_open_sec = to_candle_open_sec
@@ -60,7 +61,7 @@ class Dashboard:
     这种情况下的重复， candle 的 open_time 是不一样的，显然 h12 的 open_time 要比最后一个 h4 早8个小时，
     这种情况重复的条件是 symbol, price, tp, sl, is_buy 都对应想等
     '''
-    async def draw_paral_trade_asset(self, data_list: list, spread:float, risk_perc:float, init_balance_usd:float, leverage:float):
+    async def draw_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
         print('start draw paral trade asset')
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
@@ -108,7 +109,7 @@ class Dashboard:
         fig.update_layout(**layout_update_dict)
         fig.show()
 
-    async def draw_paral_trade_symbol_asset(self, data_list: list, spread:float, risk_perc:float, init_balance_usd:float, leverage:float):
+    async def draw_paral_trade_symbol_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
         print('start draw paral trade asset')
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
@@ -186,13 +187,13 @@ class Dashboard:
             fig.layout.annotations[idx].update(y=1-idx*trace_y_perc)
         fig.show()
 
-    def _print_paral_trade_asset(self, tp_cnt:int, sl_cnt:int, balance_start:float, balance_end:float):
+    def _print_paral_trade_asset(self, tp_cnt:int, sl_cnt:int, balance_start:Decimal, balance_end:Decimal):
         print(f'\n-------------- paral trade ---------------')
         print(f'tot {tp_cnt + sl_cnt} tp {tp_cnt} sl {sl_cnt}')
-        profit_perc = del_float_tail(100.0 * (balance_end / balance_start), bits=2)
-        print(f"balance from {del_float_tail(balance_start, bits=2)} to {del_float_tail(balance_end, bits=2)}, {profit_perc}%")
+        profit_perc = del_Decimal_tail(100.0 * (balance_end / balance_start), bits=2)
+        print(f"balance from {del_Decimal_tail(balance_start, bits=2)} to {del_Decimal_tail(balance_end, bits=2)}, {profit_perc}%")
     
-    async def _summarize_paral_trade_asset(self, data_list: list, spread:float, risk_perc:float, init_balance_usd:float, leverage:float) -> tuple:
+    async def _summarize_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal) -> tuple:
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
         if not data_list:
@@ -206,9 +207,9 @@ class Dashboard:
 
     async def _summarize_paral_trade_asset_with_alltrans(self, 
                                                          all_tran_list: list[_Transaction], 
-                                                         risk_perc:float, 
-                                                         init_balance_usd:float, 
-                                                         leverage:float) -> tuple:
+                                                         risk_perc:Decimal, 
+                                                         init_balance_usd:Decimal, 
+                                                         leverage:Decimal) -> tuple:
         balance_usd = init_balance_usd
         used_margin_usd = 0.0
         min_risk_amt_usd = init_balance_usd * risk_perc
@@ -295,7 +296,7 @@ class Dashboard:
                           analyst: IAnalyzable, 
                           peak_set:set[Candle], 
                           valley_set:set[Candle], 
-                          spread:float, 
+                          spread:Decimal, 
                           draw_signal: bool = True):
         signal_list = analyst.analyze(candle_list, peak_set, valley_set)
         tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
@@ -420,8 +421,8 @@ class Dashboard:
     @staticmethod
     def summarize(candle_list: list[Candle],
                   signal_list: list[Signal],
-                  spread:float,
-                  min_perc: float = None) -> tuple:
+                  spread:Decimal,
+                  min_perc: Decimal = None) -> tuple:
         if candle_list and signal_list:
             tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
             buy_tp_cnt = len([tran for tran in tran_list if tran.is_buy and tran.is_tp])
@@ -442,8 +443,8 @@ class Dashboard:
         #         buy=[total_buy_cnt],
         #         tp=[buy_tp_cnt],
         #         sl=[buy_sl_cnt],
-        #         tp_perc=[f"{del_float_tail(100*buy_tp_cnt/total_buy_cnt, 2)}%"],
-        #         sl_perc=[f"{del_float_tail(100*buy_sl_cnt/total_buy_cnt, 2)}%"]
+        #         tp_perc=[f"{del_Decimal_tail(100*buy_tp_cnt/total_buy_cnt, 2)}%"],
+        #         sl_perc=[f"{del_Decimal_tail(100*buy_sl_cnt/total_buy_cnt, 2)}%"]
         #     ))
         #     print(f'{summary_buy_df.to_string(index=False)}\n')
         # if total_sell_cnt:
@@ -451,8 +452,8 @@ class Dashboard:
         #         sell=[total_sell_cnt],
         #         tp=[sell_tp_cnt],
         #         sl=[sell_sl_cnt],
-        #         tp_perc=[f"{del_float_tail(100*sell_tp_cnt/total_sell_cnt, 2)}%"],
-        #         sl_perc=[f"{del_float_tail(100*sell_sl_cnt/total_sell_cnt, 2)}%"]
+        #         tp_perc=[f"{del_Decimal_tail(100*sell_tp_cnt/total_sell_cnt, 2)}%"],
+        #         sl_perc=[f"{del_Decimal_tail(100*sell_sl_cnt/total_sell_cnt, 2)}%"]
         #     ))
         #     print(f'{summary_sell_df.to_string(index=False)}\n')
 
@@ -501,7 +502,7 @@ class Dashboard:
     @staticmethod
     def _get_trans(candle_list: list[Candle],
                    signal_list: list[Signal],
-                   spread:float) -> list[_Transaction]:
+                   spread:Decimal) -> list[_Transaction]:
         # 同一个 symbol period 的一根蜡烛，不会同时 buy 和 sell 信号出现， 一个 open_sec 确实只应该出现一个信号
         signal_dict = {signal.candle_sec: signal for signal in signal_list}
         pending_signal_set = set()

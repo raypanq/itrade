@@ -1,12 +1,12 @@
-from datetime import datetime,timezone
-from src import del_float_tail, utc_date
+from .. import utc_date
+from decimal import Decimal
 from . import SymbolStr,CandlePeriod
 
 STRTIME_FMT = "%Y-%m-%d_%H'%M\"%S"
 
 
 class Candle:
-    def __init__(self, o:float, h:float, l:float, c:float, open_sec:int, symstr:SymbolStr, period:CandlePeriod) -> None:
+    def __init__(self, o:Decimal, h:Decimal, l:Decimal, c:Decimal, open_sec:float, symstr:SymbolStr, period:CandlePeriod) -> None:
         self.o = o
         self.h = h
         self.l = l
@@ -15,9 +15,6 @@ class Candle:
         self.symstr = symstr
         self.period = period
 
-    @property
-    def c_4f(self):
-        return del_float_tail(self.c, 4)
     
     @property
     def body(self):
@@ -35,9 +32,6 @@ class Candle:
     def len(self):
         return self.h - self.l
 
-    @property
-    def o_4f(self):
-        return del_float_tail(self.o, 4)
 
     @property
     def strtime(self) -> str:
