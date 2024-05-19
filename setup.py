@@ -7,9 +7,9 @@ setup(
     install_requires=[
         # list your project's dependencies here
         # e.g., 'requests >= 2.23.0',
+        # 'tortoise-orm',
         'pandas',
         'plotly',
-        # 'tortoise-orm',
         'websockets',
         'setuptools'
     ],
