@@ -4,9 +4,8 @@ from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 from decimal import Decimal
 import pandas as pd
-from . import get_emas, get_atrs
-from . import get_rsis
-from .. import utc_date
+from . import get_rsis, get_emas, get_atrs
+from .. import utc_date, trunc
 from ..model import SymbolStr
 from functools import reduce
 from . import FeeCalculable, Analyzable
@@ -185,8 +184,9 @@ class Dashboard:
     def _print_paral_trade_asset(self, tp_cnt:int, sl_cnt:int, balance_start:Decimal, balance_end:Decimal):
         print(f'\n-------------- paral trade ---------------')
         print(f'tot {tp_cnt + sl_cnt} tp {tp_cnt} sl {sl_cnt}')
-        profit_perc = Decimal(100.0) * round(balance_end / balance_start, 3)
-        print(f"balance from {round(balance_start, 3)} to {round(balance_end, 3)}, {profit_perc}%")
+        profit_perc = trunc(balance_end / balance_start, 4)
+        profit_perc_str = f"{Decimal(100.0) * profit_perc}%"
+        print(f"balance from {trunc(balance_start)} to {trunc(balance_end)}, {profit_perc_str}")
     
     async def _summarize_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal) -> tuple:
         #只保留有信号的组合
