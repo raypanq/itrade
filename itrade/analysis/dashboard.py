@@ -11,7 +11,7 @@ from ..model import SymbolStr
 from functools import reduce
 from . import FeeCalculable, Analyzable
 
-_MIN_UNIT = 0.01*pow(10,5) #0.01 Lot
+_MIN_UNIT = Decimal(0.01*pow(10,5)) #0.01 Lot
 
 class _Transaction:
     def __init__(self,
