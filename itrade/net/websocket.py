@@ -7,13 +7,13 @@ from . import Streamable
 class Websocket:
     def __init__(self, 
                  streamer:Streamable, 
-                 auto_reconn:bool,
+                 auto_reconnect:bool,
                  domain:str,
                  port:int) -> None:
         self._domain = domain
         self._port = port
         self._streamer = streamer
-        self._auto_reconnect = auto_reconn
+        self._auto_reconnect = auto_reconnect
 
     def run_loop(self):
         loop = asyncio.get_event_loop()
