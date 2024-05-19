@@ -6,9 +6,8 @@ from decimal import Decimal
 import pandas as pd
 from . import get_emas, get_atrs
 from . import get_rsis
-from .. import del_Decimal_tail, utc_date
+from .. import utc_date
 from ..model import SymbolStr
-from ..analysis import IAnalyzable
 from functools import reduce
 from . import FeeCalculable
 
