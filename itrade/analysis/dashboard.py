@@ -9,7 +9,7 @@ from . import get_rsis
 from .. import utc_date
 from ..model import SymbolStr
 from functools import reduce
-from . import FeeCalculable
+from . import FeeCalculable, Analyzable
 
 _MIN_UNIT = 0.01*pow(10,5) #0.01 Lot
 
@@ -290,7 +290,7 @@ class Dashboard:
     
     def draw_candle_chart(self, 
                           candle_list: list[Candle], 
-                          analyst: IAnalyzable, 
+                          analyst: Analyzable, 
                           peak_set:set[Candle], 
                           valley_set:set[Candle], 
                           spread:Decimal, 
