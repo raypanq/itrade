@@ -20,7 +20,7 @@ setup(
     author='ray',
     author_email='raypang@tuta.io',
     description='itrade contains backtest, trade tools',
-    long_description=open('README.md').read(),
+    long_description="",
     long_description_content_type='text/markdown',  # This is important!
     url='https://github.com/raypanq/itrade',
     classifiers=[
