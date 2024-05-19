@@ -8,7 +8,10 @@ setup(
         # list your project's dependencies here
         # e.g., 'requests >= 2.23.0',
         'pandas',
-        'plotly'
+        'plotly',
+        # 'tortoise-orm',
+        'websockets',
+        'setuptools'
     ],
     entry_points={
         'console_scripts': [
