@@ -16,9 +16,10 @@ class Websocket:
         self._auto_reconnect = auto_reconnect
 
     def run_loop(self):
-        loop = asyncio.get_event_loop()
+        asyncio.run(self._connect())
+        # loop = asyncio.get_event_loop()
         # loop.create_task(self._conn_listen())
-        loop.run_until_complete(self._connect())
+        # loop.run_until_complete(self._connect())
         # loop.run_forever()
         
     async def _connect(self):
