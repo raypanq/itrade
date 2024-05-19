@@ -22,7 +22,9 @@ class FeeCalculable(Protocol):
 
 def get_emas(num_list: list[Decimal], win:int) -> list[Decimal]:
     ema_series = pd.Series(num_list).ewm(span=win, adjust=False).mean()
-    return list(ema_series)
+    ema_float_list = list(ema_series)
+    ema_decimal_list = [Decimal(ema) for ema in ema_float_list]
+    return ema_decimal_list
 
 def get_atrs(h_list: list[Decimal], l_list: list[Decimal], c_list: list[Decimal], win=int) -> list[Decimal]:
     df = pd.DataFrame(dict(
@@ -34,7 +36,9 @@ def get_atrs(h_list: list[Decimal], l_list: list[Decimal], c_list: list[Decimal]
     df['h-prev_c'] = abs(df.h - df.c.shift())
     df['l-prev_c'] = abs(df.l - df.c.shift())
     df['tr'] = df[['h-l', 'h-prev_c', 'l-prev_c']].max(axis=1)
-    return list(df.tr.ewm(span=win, adjust=False).mean())
+    atr_float_list = list(df.tr.ewm(span=win, adjust=False).mean())
+    atr_decimal_list = [Decimal(atr) for atr in atr_float_list]
+    return atr_decimal_list
 
 def get_rsis(num_list:list[Decimal], win:int) -> list[Decimal]:
     series = pd.Series(num_list)
@@ -46,9 +50,10 @@ def get_rsis(num_list:list[Decimal], win:int) -> list[Decimal]:
     avg_loss = loss.rolling(window=win).mean()
 
     rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-
-    return list(rsi)
+    rsi_series = 100 - (100 / (1 + rs))
+    rsi_float_list = list(rsi_series)
+    rsi_decimal_list = [Decimal(rsi) for rsi in rsi_float_list]
+    return rsi_decimal_list
 
 def get_peaks_valleys(candle_list: list[Candle]) -> tuple[set[Candle], set[Candle]]:
     # peaks and valleys
