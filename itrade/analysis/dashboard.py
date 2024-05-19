@@ -4,13 +4,11 @@ from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 from decimal import Decimal
 import pandas as pd
-from . import get_emas, get_peaks_valleys, get_atrs
+from . import get_emas, get_atrs
 from . import get_rsis
-from .. import del_Decimal_tail, utc_date, utc_now
-from ..model import SymbolStr, CandlePeriod
+from .. import del_Decimal_tail, utc_date
+from ..model import SymbolStr
 from ..analysis import IAnalyzable
-import asyncio
-from asyncio import Future as AsyncFuture
 from functools import reduce
 from . import IFeeCalculable
 
@@ -61,7 +59,7 @@ class Dashboard:
     这种情况下的重复， candle 的 open_time 是不一样的，显然 h12 的 open_time 要比最后一个 h4 早8个小时，
     这种情况重复的条件是 symbol, price, tp, sl, is_buy 都对应想等
     '''
-    async def draw_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
+    async def draw_paral_trade_asset(self, data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
         print('start draw paral trade asset')
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
