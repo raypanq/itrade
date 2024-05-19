@@ -41,16 +41,13 @@ def get_atrs(h_list: list[Decimal], l_list: list[Decimal], c_list: list[Decimal]
     return atr_decimal_list
 
 def get_rsis(num_list:list[Decimal], win:int) -> list[Decimal]:
-    series = pd.Series(num_list)
-    delta = series.diff()
-    gain = (delta.where(delta > 0, 0)).fillna(0)
-    loss = (-delta.where(delta < 0, 0)).fillna(0)
+    close_delta = pd.Series(num_list).diff()
+    up = close_delta.clip(lower=0)
+    down = -1 * close_delta.clip(upper=0)
 
-    avg_gain = gain.rolling(window=win).mean()
-    avg_loss = loss.rolling(window=win).mean()
-
-    rs = avg_gain / avg_loss
-    rsi_series = 100 - (100 / (1 + rs))
+    ma_up = up.ewm(com=win - 1, adjust=True, min_periods=win).mean()
+    ma_down = down.ewm(com=win - 1, adjust=True, min_periods=win).mean()
+    rsi_series = 100 - (100 / (1 + ma_up / ma_down))
     rsi_float_list = list(rsi_series)
     rsi_decimal_list = [Decimal(rsi) for rsi in rsi_float_list]
     return rsi_decimal_list
