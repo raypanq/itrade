@@ -185,8 +185,8 @@ class Dashboard:
     def _print_paral_trade_asset(self, tp_cnt:int, sl_cnt:int, balance_start:Decimal, balance_end:Decimal):
         print(f'\n-------------- paral trade ---------------')
         print(f'tot {tp_cnt + sl_cnt} tp {tp_cnt} sl {sl_cnt}')
-        profit_perc = Decimal(100.0) * (balance_end / balance_start)
-        print(f"balance from {balance_start} to {balance_end}, {profit_perc}%")
+        profit_perc = Decimal(100.0) * round(balance_end / balance_start, 3)
+        print(f"balance from {round(balance_start, 3)} to {round(balance_end, 3)}, {profit_perc}%")
     
     async def _summarize_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal) -> tuple:
         #只保留有信号的组合
