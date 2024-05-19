@@ -187,8 +187,8 @@ class Dashboard:
     def _print_paral_trade_asset(self, tp_cnt:int, sl_cnt:int, balance_start:Decimal, balance_end:Decimal):
         print(f'\n-------------- paral trade ---------------')
         print(f'tot {tp_cnt + sl_cnt} tp {tp_cnt} sl {sl_cnt}')
-        profit_perc = del_Decimal_tail(100.0 * (balance_end / balance_start), bits=2)
-        print(f"balance from {del_Decimal_tail(balance_start, bits=2)} to {del_Decimal_tail(balance_end, bits=2)}, {profit_perc}%")
+        profit_perc = 100.0 * (balance_end / balance_start)
+        print(f"balance from {balance_start} to {balance_end}, {profit_perc}%")
     
     async def _summarize_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal) -> tuple:
         #只保留有信号的组合
@@ -435,24 +435,6 @@ class Dashboard:
                 total_tp_perc = total_tp_cnt / total_fill_cnt
                 if ((min_perc is not None and total_tp_perc >= min_perc) or min_perc is None):
                     return total_tp_cnt, total_sl_cnt
-        # if total_buy_cnt:
-        #     summary_buy_df = pd.DataFrame(dict(
-        #         buy=[total_buy_cnt],
-        #         tp=[buy_tp_cnt],
-        #         sl=[buy_sl_cnt],
-        #         tp_perc=[f"{del_Decimal_tail(100*buy_tp_cnt/total_buy_cnt, 2)}%"],
-        #         sl_perc=[f"{del_Decimal_tail(100*buy_sl_cnt/total_buy_cnt, 2)}%"]
-        #     ))
-        #     print(f'{summary_buy_df.to_string(index=False)}\n')
-        # if total_sell_cnt:
-        #     summary_sell_df = pd.DataFrame(dict(
-        #         sell=[total_sell_cnt],
-        #         tp=[sell_tp_cnt],
-        #         sl=[sell_sl_cnt],
-        #         tp_perc=[f"{del_Decimal_tail(100*sell_tp_cnt/total_sell_cnt, 2)}%"],
-        #         sl_perc=[f"{del_Decimal_tail(100*sell_sl_cnt/total_sell_cnt, 2)}%"]
-        #     ))
-        #     print(f'{summary_sell_df.to_string(index=False)}\n')
 
     def _get_shapes(self, tran_list:list[_Transaction]) -> list[dict]:
         green = '#089981'
