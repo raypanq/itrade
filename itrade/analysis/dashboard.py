@@ -29,11 +29,11 @@ class _Transaction:
         self.price = price
         self.tp = tp
         self.sl = sl
-        self.unit = 0.0
-        self.used_margin_usd = 0.0
+        self.unit = Decimal(0.0)
+        self.used_margin_usd = Decimal(0.0)
         self.symstr = symstr
-        self.risk_amt_usd = 0.0
-        self.order_amt_usd = 0.0
+        self.risk_amt_usd = Decimal(0.0)
+        self.order_amt_usd = Decimal(0.0)
 
     @property
     def is_sell(self) ->bool:
@@ -208,7 +208,7 @@ class Dashboard:
                                                          init_balance_usd:Decimal, 
                                                          leverage:Decimal) -> tuple:
         balance_usd = init_balance_usd
-        used_margin_usd = 0.0
+        used_margin_usd = Decimal(0.0)
         min_risk_amt_usd = init_balance_usd * risk_perc
         time_balance_usedmargin_list:list[tuple] = [] # for drawing line chart
         tp_cnt = 0
