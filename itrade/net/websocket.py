@@ -42,4 +42,4 @@ class Websocket:
     async def _listen(self, connection:WebSocketClientProtocol):
         while True:
             resp_jsonstr = await connection.recv()
-            self._streamer.received(connection, resp_jsonstr)
+            asyncio.create_task(self._streamer.received(connection, resp_jsonstr))
