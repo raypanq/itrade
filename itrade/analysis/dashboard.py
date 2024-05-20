@@ -73,9 +73,9 @@ class Dashboard:
         tp_cnt, sl_cnt, time_balance_usedmargin_list = await self._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage)
         _, balance_start, _ = time_balance_usedmargin_list[0]
         _, balance_end, _ = time_balance_usedmargin_list[-1]
-        self._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end)
         date_list = [utc_date(t_sec) for t_sec,_,_ in time_balance_usedmargin_list]
         strtime_list = [date.strftime(STRTIME_FMT) for date in date_list]
+        self._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end, strtime_list[0], strtime_list[-1])
         # balance
         print('start draw balance')
         balance_trace = go.Scatter(
@@ -142,9 +142,9 @@ class Dashboard:
         tp_cnt, sl_cnt, time_balance_usedmargin_list = await self._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage)
         _, balance_start, _ = time_balance_usedmargin_list[0]
         _, balance_end, _ = time_balance_usedmargin_list[-1]
-        self._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end)
         date_list = [utc_date(t_sec) for t_sec,_,_ in time_balance_usedmargin_list]
         strtime_list = [date.strftime(STRTIME_FMT) for date in date_list]
+        self._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end, strtime_list[0], strtime_list[-1])
         # balance
         print('start draw balance')
         balance_trace = go.Scatter(
@@ -181,8 +181,15 @@ class Dashboard:
             fig.layout.annotations[idx].update(y=1-idx*trace_y_perc)
         fig.show()
 
-    def _print_paral_trade_asset(self, tp_cnt:int, sl_cnt:int, balance_start:Decimal, balance_end:Decimal):
+    def _print_paral_trade_asset(self, 
+                                 tp_cnt:int, 
+                                 sl_cnt:int, 
+                                 balance_start:Decimal, 
+                                 balance_end:Decimal,
+                                 from_str:str,
+                                 to_str:str):
         print(f'\n-------------- paral trade ---------------')
+        print(f'{from_str}  {to_str}')
         print(f'tot {tp_cnt + sl_cnt} tp {tp_cnt} sl {sl_cnt}')
         profit_perc = balance_end / balance_start
         profit_perc_str = f"{trunc(100 * profit_perc)}%"
