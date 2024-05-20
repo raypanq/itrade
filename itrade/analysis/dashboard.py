@@ -41,10 +41,6 @@ class _Transaction:
         return not self.is_tp
 
 class Dashboard:
-
-    def __init__(self, fee_calc:FeeCalculable):
-        self._fee_calc = fee_calc
-
     '''
     现实中的交易过程是， 同时监听 eurusd h12 h4 的数据， symbol 不一样的情况不需要去重，就不用考虑了
     这样第一种需要去重的情况是，eurusd h4 同时适用于2种以上的策略，那么不同的策略可能会在同样的 candle 产生重复的交易信号，所以相同symbol相同period存在两种以上策略的话，就要去重，
@@ -55,7 +51,8 @@ class Dashboard:
     这种情况下的重复， candle 的 open_time 是不一样的，显然 h12 的 open_time 要比最后一个 h4 早8个小时，
     这种情况重复的条件是 symbol, price, tp, sl, is_buy 都对应想等
     '''
-    async def draw_paral_trade_asset(self, data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
+    @staticmethod
+    async def draw_paral_trade_asset(data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable):
         """
         只画资产走势图
         """
@@ -73,7 +70,7 @@ class Dashboard:
             tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
             all_tran_list.extend(tran_list)
         
-        tp_cnt, sl_cnt, time_balance_usedmargin_list = await self._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage)
+        tp_cnt, sl_cnt, time_balance_usedmargin_list = await Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
         _, balance_start, _ = time_balance_usedmargin_list[0]
         _, balance_end, _ = time_balance_usedmargin_list[-1]
         date_list = [utc_date(t_sec) for t_sec,_,_ in time_balance_usedmargin_list]
@@ -106,7 +103,13 @@ class Dashboard:
         fig.update_layout(**layout_update_dict)
         fig.show()
 
-    async def draw_paral_trade_symbolperiod_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
+    @staticmethod
+    async def draw_paral_trade_symbolperiod_asset(data_list: list, 
+                                                  spread:Decimal, 
+                                                  risk_perc:Decimal, 
+                                                  init_balance_usd:Decimal, 
+                                                  leverage:Decimal, 
+                                                  fee_calc:FeeCalculable):
         """
         画所有交易对的图, 以及资产走势图
         """
@@ -145,12 +148,12 @@ class Dashboard:
             fig.update_layout(**layout_update_dict)
             [fig.add_shape(shape, row=row, col=1) for shape in shape_list]
         
-        tp_cnt, sl_cnt, time_balance_usedmargin_list = await self._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage)
+        tp_cnt, sl_cnt, time_balance_usedmargin_list = await Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
         _, balance_start, _ = time_balance_usedmargin_list[0]
         _, balance_end, _ = time_balance_usedmargin_list[-1]
         date_list = [utc_date(t_sec) for t_sec,_,_ in time_balance_usedmargin_list]
         strtime_list = [date.strftime(STRTIME_FMT) for date in date_list]
-        self._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end, strtime_list[0], strtime_list[-1])
+        Dashboard._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end, strtime_list[0], strtime_list[-1])
         # balance
         print('start draw balance')
         balance_trace = go.Scatter(
@@ -187,8 +190,8 @@ class Dashboard:
             fig.layout.annotations[idx].update(y=1-idx*trace_y_perc)
         fig.show()
 
-    def _print_paral_trade_asset(self, 
-                                 tp_cnt:int, 
+    @staticmethod
+    def _print_paral_trade_asset(tp_cnt:int, 
                                  sl_cnt:int, 
                                  balance_start:Decimal, 
                                  balance_end:Decimal,
@@ -201,7 +204,8 @@ class Dashboard:
         profit_perc_str = f"{trunc(100 * profit_perc)}%"
         print(f"balance from {trunc(balance_start)} to {trunc(balance_end)}, {profit_perc_str}\n")
     
-    async def _summarize_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal) -> tuple:
+    @staticmethod
+    async def _summarize_paral_trade_asset(data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable) -> tuple:
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
         if not data_list:
@@ -211,13 +215,14 @@ class Dashboard:
             for candle_list, signal_list,_,_ in data_list
             for tran in Dashboard._get_trans(candle_list, signal_list, spread)
         ]
-        return await self._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage)
+        return await Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
 
-    async def _summarize_paral_trade_asset_with_alltrans(self, 
-                                                         all_tran_list: list[_Transaction], 
+    @staticmethod
+    async def _summarize_paral_trade_asset_with_alltrans(all_tran_list: list[_Transaction], 
                                                          risk_perc:Decimal, 
                                                          init_balance_usd:Decimal, 
-                                                         leverage:Decimal) -> tuple:
+                                                         leverage:Decimal,
+                                                         fee_calc:FeeCalculable) -> tuple:
         balance_usd = init_balance_usd
         used_margin_usd = Decimal(0)
         min_risk_amt_usd = init_balance_usd * risk_perc
@@ -257,9 +262,9 @@ class Dashboard:
                     # profit or loss
                     balance_usd += (diff_order_amt_usd if tran.is_tp else -diff_order_amt_usd)
                     # commission fee
-                    balance_usd += self._fee_calc.get_commission_fee(tran.order_amt_usd)
+                    balance_usd += fee_calc.get_commission_fee(tran.order_amt_usd)
                     # swap fee
-                    balance_usd += self._fee_calc.get_swap_fee(tran.symstr, 
+                    balance_usd += fee_calc.get_swap_fee(tran.symstr, 
                                                                tran.unit/pow(10,5),
                                                                tran.from_candle_open_sec, 
                                                                tran.to_candle_open_sec, 
@@ -291,7 +296,7 @@ class Dashboard:
                             tran.used_margin_usd = order_used_margin_usd
                             used_margin_usd += order_used_margin_usd
                             time_balance_usedmargin_list.append((t_sec, balance_usd, used_margin_usd))
-                            balance_usd += self._fee_calc.get_commission_fee(order_amt_usd)
+                            balance_usd += fee_calc.get_commission_fee(order_amt_usd)
                             pending_tran_list.append(tran)
                     else:
                         print("no enough free margin to place order")
