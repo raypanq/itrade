@@ -56,6 +56,9 @@ class Dashboard:
     这种情况重复的条件是 symbol, price, tp, sl, is_buy 都对应想等
     '''
     async def draw_paral_trade_asset(self, data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
+        """
+        只画资产走势图
+        """
         print('start draw paral trade asset')
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
@@ -103,7 +106,10 @@ class Dashboard:
         fig.update_layout(**layout_update_dict)
         fig.show()
 
-    async def draw_paral_trade_symbol_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
+    async def draw_paral_trade_symbolperiod_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal):
+        """
+        画所有交易对的图, 以及资产走势图
+        """
         print('start draw paral trade asset')
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
