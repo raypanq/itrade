@@ -199,7 +199,7 @@ class Dashboard:
         print(f'tot {tp_cnt + sl_cnt} tp {tp_cnt} sl {sl_cnt}')
         profit_perc = balance_end / balance_start
         profit_perc_str = f"{trunc(100 * profit_perc)}%"
-        print(f"balance from {trunc(balance_start)} to {trunc(balance_end)}, {profit_perc_str}")
+        print(f"balance from {trunc(balance_start)} to {trunc(balance_end)}, {profit_perc_str}\n")
     
     async def _summarize_paral_trade_asset(self, data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal) -> tuple:
         #只保留有信号的组合
