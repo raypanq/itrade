@@ -15,14 +15,14 @@ class Websocket:
         self._streamer = streamer
         self._auto_reconnect = auto_reconnect
 
-    def run_loop(self):
-        asyncio.run(self._connect())
+    # def run_loop(self):
+    #     asyncio.run(self._connect())
         # loop = asyncio.get_event_loop()
         # loop.create_task(self._conn_listen())
         # loop.run_until_complete(self._connect())
         # loop.run_forever()
         
-    async def _connect(self):
+    async def connect(self):
         url = f"wss://{self._domain}:{self._port}"
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
