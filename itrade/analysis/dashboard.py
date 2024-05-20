@@ -75,7 +75,7 @@ class Dashboard:
         _, balance_end, _ = time_balance_usedmargin_list[-1]
         date_list = [utc_date(t_sec) for t_sec,_,_ in time_balance_usedmargin_list]
         strtime_list = [date.strftime(STRTIME_FMT) for date in date_list]
-        self._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end, strtime_list[0], strtime_list[-1])
+        Dashboard._print_paral_trade_asset(tp_cnt, sl_cnt, balance_start, balance_end, strtime_list[0], strtime_list[-1])
         # balance
         print('start draw balance')
         balance_trace = go.Scatter(
@@ -137,7 +137,7 @@ class Dashboard:
             trace_y_end = min(1.0, 1-idx*trace_y_perc)
             trace_y_start = max(0.0, trace_y_end-trace_y_perc)
             trace_y_domain = [trace_y_start, trace_y_end]
-            shape_list = self._get_shapes(tran_list)
+            shape_list = Dashboard._get_shapes(tran_list)
             candle_trace, trend_trace, ema_trace, atr_trace, rsi_trace, buy_trace, sell_trace = trace_tuple
             row = idx+1
             fig.add_traces([candle_trace, trend_trace, ema_trace, buy_trace, sell_trace], rows=row, cols=1)
@@ -302,8 +302,8 @@ class Dashboard:
                         print("no enough free margin to place order")
         return tp_cnt, sl_cnt, time_balance_usedmargin_list
     
-    def draw_candle_chart(self, 
-                          candle_list: list[Candle], 
+    @staticmethod
+    def draw_candle_chart(candle_list: list[Candle], 
                           analyst: Analyzable, 
                           peak_set:set[Candle], 
                           valley_set:set[Candle], 
@@ -311,7 +311,7 @@ class Dashboard:
                           draw_signal: bool = True):
         signal_list = analyst.analyze(candle_list, peak_set, valley_set)
         tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
-        shape_list = self._get_shapes(tran_list)
+        shape_list = Dashboard._get_shapes(tran_list)
         candle_trace, trend_trace, ema_trace, atr_trace, rsi_trace, buy_trace, sell_trace = Dashboard._get_traces(candle_list, signal_list, peak_set, valley_set)
         fig = make_subplots(rows=3, cols=1, shared_xaxes=True)
 
@@ -340,7 +340,7 @@ class Dashboard:
             yaxis3=dict(showgrid=False, domain=[0, 0.2]),
         )
         fig.show()
-        tp_cnt, sl_cnt = self.summarize(candle_list, signal_list)
+        tp_cnt, sl_cnt = Dashboard.summarize(candle_list, signal_list)
         tot_cnt = tp_cnt+sl_cnt
         tp_perc = tp_cnt / tot_cnt
         sl_perc = sl_cnt / tot_cnt
@@ -450,7 +450,8 @@ class Dashboard:
                 if ((min_perc is not None and total_tp_perc >= min_perc) or min_perc is None):
                     return total_tp_cnt, total_sl_cnt
 
-    def _get_shapes(self, tran_list:list[_Transaction]) -> list[dict]:
+    @staticmethod
+    def _get_shapes(tran_list:list[_Transaction]) -> list[dict]:
         green = '#089981'
         red = '#F23645'
         shape_list = []
