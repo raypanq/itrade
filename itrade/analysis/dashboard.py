@@ -274,7 +274,7 @@ class Dashboard:
                     tp_cnt += 1 if tran.is_tp else 0
                     sl_cnt += 1 if tran.is_sl else 0
                     pending_tran_list.remove(tran)
-                    print("closing position")
+                    print("    <-- closing position")
 
                 elif tran.from_candle_open_sec == t_sec:
                     risk_amt_usd = max(balance_usd * risk_perc, min_risk_amt_usd)
@@ -299,7 +299,7 @@ class Dashboard:
                             time_balance_usedmargin_list.append((t_sec, balance_usd, used_margin_usd))
                             balance_usd += fee_calc.get_commission_fee(order_amt_usd)
                             pending_tran_list.append(tran)
-                            print("opening position")
+                            print("--> opening position")
                     else:
                         print("no enough free margin to place order")
         return tp_cnt, sl_cnt, time_balance_usedmargin_list
