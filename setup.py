@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='itrade',
+    name='pyade',
     version='0.1',
     packages=find_packages(),
     install_requires=[
@@ -25,7 +25,7 @@ setup(
     description='itrade contains backtest, trade tools',
     long_description="",
     long_description_content_type='text/markdown',  # This is important!
-    url='https://github.com/raypanq/itrade_py',
+    url='https://github.com/raypanq/pyade_py',
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.org/classifiers/
