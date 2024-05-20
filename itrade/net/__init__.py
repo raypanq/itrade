@@ -8,7 +8,7 @@ class Streamable(Protocol):
     async def connected(connection:WebSocketClientProtocol):
         pass
 
-    async def received(jsonstr:str):
+    async def received(connection:WebSocketClientProtocol, jsonstr:str):
         pass
 
     async def closed(e:Exception):

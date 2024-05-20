@@ -39,7 +39,7 @@ class Websocket:
                     if not self._auto_reconnect:
                         break
 
-    async def _listen(self, ws:WebSocketClientProtocol):
+    async def _listen(self, connection:WebSocketClientProtocol):
         while True:
-            resp_jsonstr = await ws.recv()
-            self._streamer.received(resp_jsonstr)
+            resp_jsonstr = await connection.recv()
+            self._streamer.received(connection, resp_jsonstr)
