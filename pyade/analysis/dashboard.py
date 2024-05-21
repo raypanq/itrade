@@ -56,11 +56,11 @@ class Dashboard:
         """
         只画资产走势图
         """
-        print('start draw paral trade asset')
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
         if not data_list:
             return 
+        print('start draw paral trade asset')
         # 资产图加上usedmargin图，其他的蜡烛图
         fig = make_subplots(rows=2, cols=1)
         print('start add traces to fig')
@@ -113,11 +113,11 @@ class Dashboard:
         """
         画所有交易对的图, 以及资产走势图
         """
-        print('start draw paral trade asset')
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
         if not data_list:
             return 
+        print('start draw paral trade asset')
         # 资产图加上usedmargin图，其他的蜡烛图
         trace_num = len(data_list) + 2
         trace_y_perc = 1.0/trace_num
