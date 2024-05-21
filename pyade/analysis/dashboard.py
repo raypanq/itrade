@@ -52,7 +52,7 @@ class Dashboard:
     这种情况重复的条件是 symbol, price, tp, sl, is_buy 都对应想等
     '''
     @staticmethod
-    async def draw_paral_trade_asset(data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable):
+    def draw_paral_trade_asset(data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable):
         """
         只画资产走势图
         """
@@ -70,7 +70,7 @@ class Dashboard:
             tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
             all_tran_list.extend(tran_list)
         
-        tp_cnt, sl_cnt, time_balance_usedmargin_list = await Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
+        tp_cnt, sl_cnt, time_balance_usedmargin_list = Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
         _, balance_start, _ = time_balance_usedmargin_list[0]
         _, balance_end, _ = time_balance_usedmargin_list[-1]
         date_list = [utc_date(t_sec) for t_sec,_,_ in time_balance_usedmargin_list]
@@ -104,7 +104,7 @@ class Dashboard:
         fig.show()
 
     @staticmethod
-    async def draw_paral_trade_symbolperiod_asset(data_list: list, 
+    def draw_paral_trade_symbolperiod_asset(data_list: list, 
                                                   spread:Decimal, 
                                                   risk_perc:Decimal, 
                                                   init_balance_usd:Decimal, 
@@ -148,7 +148,7 @@ class Dashboard:
             fig.update_layout(**layout_update_dict)
             [fig.add_shape(shape, row=row, col=1) for shape in shape_list]
         
-        tp_cnt, sl_cnt, time_balance_usedmargin_list = await Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
+        tp_cnt, sl_cnt, time_balance_usedmargin_list = Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
         _, balance_start, _ = time_balance_usedmargin_list[0]
         _, balance_end, _ = time_balance_usedmargin_list[-1]
         date_list = [utc_date(t_sec) for t_sec,_,_ in time_balance_usedmargin_list]
@@ -207,7 +207,7 @@ class Dashboard:
         # print(f"net profit {trunc(balance_end - balance_start)}, {trunc(100 * (profit_perc-1))}%\n")
     
     @staticmethod
-    async def _summarize_paral_trade_asset(data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable) -> tuple:
+    def _summarize_paral_trade_asset(data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable) -> tuple:
         #只保留有信号的组合
         data_list = [data for data in data_list if data[1]]
         if not data_list:
@@ -217,10 +217,10 @@ class Dashboard:
             for candle_list, signal_list,_,_ in data_list
             for tran in Dashboard._get_trans(candle_list, signal_list, spread)
         ]
-        return await Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
+        return Dashboard._summarize_paral_trade_asset_with_alltrans(all_tran_list, risk_perc, init_balance_usd, leverage, fee_calc)
 
     @staticmethod
-    async def _summarize_paral_trade_asset_with_alltrans(all_tran_list: list[_Transaction], 
+    def _summarize_paral_trade_asset_with_alltrans(all_tran_list: list[_Transaction], 
                                                          risk_perc:Decimal, 
                                                          init_balance_usd:Decimal, 
                                                          leverage:Decimal,
