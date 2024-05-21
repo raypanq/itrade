@@ -52,7 +52,7 @@ class Dashboard:
     这种情况重复的条件是 symbol, price, tp, sl, is_buy 都对应想等
     '''
     @staticmethod
-    def draw_paral_trade_asset(data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable):
+    def draw_paral_trade_asset(data_list:list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable, balance_title:str):
         """
         只画资产走势图
         """
@@ -61,8 +61,8 @@ class Dashboard:
         if not data_list:
             return 
         print('start draw paral trade asset')
-        # 资产图加上usedmargin图，其他的蜡烛图
-        fig = make_subplots(rows=2, cols=1)
+        # 资产图加上usedmargin图
+        fig = make_subplots(rows=2, cols=1, subplot_titles=[balance_title, "used margin"], vertical_spacing=0)
         print('start add traces to fig')
         all_tran_list:list[_Transaction] = []
         for data in data_list:
