@@ -201,8 +201,8 @@ class Dashboard:
         print(f'{from_str}  {to_str}')
         print(f'tot {tp_cnt + sl_cnt} tp {tp_cnt} sl {sl_cnt}')
         profit_perc = balance_end / balance_start
-        profit_perc_str = f"{trunc(100 * profit_perc)}%"
-        print(f"balance from {trunc(balance_start)} to {trunc(balance_end)}, {profit_perc_str}\n")
+        print(f"balance from {trunc(balance_start)} to {trunc(balance_end)}, {trunc(100 * profit_perc)}%")
+        print(f"net profit {trunc(balance_end - balance_start)}, {trunc(100 * (profit_perc-1))}%\n")
     
     @staticmethod
     async def _summarize_paral_trade_asset(data_list: list, spread:Decimal, risk_perc:Decimal, init_balance_usd:Decimal, leverage:Decimal, fee_calc:FeeCalculable) -> tuple:
