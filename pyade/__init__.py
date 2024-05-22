@@ -1,11 +1,6 @@
-import string, random
 from datetime import datetime, timezone
 import math
 from decimal import Decimal
-
-def random_str(len:int=10) -> str:
-    chars = string.ascii_letters + string.digits
-    return ''.join(random.choices(chars, k=len))
 
 def utc_now() -> datetime:
     return datetime.now(tz=timezone.utc)
