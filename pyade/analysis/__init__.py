@@ -6,19 +6,23 @@ from ..model import SymbolStr
 from decimal import Decimal
 
 class Analyzable(Protocol):
+    @staticmethod
     def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle]) -> list[Signal]:
-        pass
+        raise NotImplementedError()
 
 class ChiefAnalyzable(Protocol):
+    @staticmethod
     def analyze(candle_list: list[Candle], peak_set:set[Candle], valley_set:set[Candle], analyst_list:list[Analyzable]) -> list[Signal]:
-        pass
+        raise NotImplementedError()
 
 class FeeCalculable(Protocol):
+    @staticmethod
     def get_commission_fee(order_amt_usd: Decimal) -> Decimal:
-        pass
+        raise NotImplementedError()
         
+    @staticmethod
     def get_swap_fee(symstr:SymbolStr, lot:Decimal, from_sec:float, to_sec:float, is_buy:bool) -> Decimal:
-        pass
+        raise NotImplementedError()
 
 def get_emas(num_list: list[Decimal], win:int) -> list[Decimal]:
     ema_series = pd.Series(num_list).ewm(span=win, adjust=False).mean()

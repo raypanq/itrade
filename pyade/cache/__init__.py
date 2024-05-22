@@ -1,8 +1,10 @@
 from typing import Protocol
 
 class Cacheable(Protocol):
-    def update(self, new_kvs:dict):
-        pass
+    @staticmethod
+    def update(new_kvs:dict):
+        raise NotImplementedError()
 
-    def get_val(self, key:str):
-        pass
+    @staticmethod
+    def get_val(key:str):
+        raise NotImplementedError()
