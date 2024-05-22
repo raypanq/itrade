@@ -4,11 +4,10 @@ from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 from decimal import Decimal
 import pandas as pd
-from . import get_rsis, get_emas, get_atrs
+from . import FeeCalculable, Analyzable, get_rsis, get_emas, get_atrs, get_peaks_valleys
 from .. import utc_date, trunc
 from ..model import SymbolStr
 from functools import reduce
-from . import FeeCalculable, Analyzable
 
 class _Transaction:
     def __init__(self,
@@ -133,12 +132,15 @@ class Dashboard:
             candle_list, signal_list, peak_set, valley_set = data
             tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
             all_tran_list.extend(tran_list)
-            trace_tuple = Dashboard._get_traces(candle_list, signal_list, peak_set, valley_set)
             trace_y_end = min(1.0, 1-idx*trace_y_perc)
             trace_y_start = max(0.0, trace_y_end-trace_y_perc)
             trace_y_domain = [trace_y_start, trace_y_end]
             shape_list = Dashboard._get_shapes(tran_list)
-            candle_trace, trend_trace, ema_trace, atr_trace, rsi_trace, buy_trace, sell_trace = trace_tuple
+            candle_trace = Dashboard._get_candle_traces(candle_list)
+            trend_trace = Dashboard._get_trends_traces(candle_list, peak_set, valley_set)
+            ema_trace = Dashboard._get_ema_traces(candle_list)
+            buy_trace = Dashboard._get_buy_signals_traces(candle_list, signal_list)
+            sell_trace = Dashboard._get_sell_signals_traces(candle_list, signal_list)
             row = idx+1
             fig.add_traces([candle_trace, trend_trace, ema_trace, buy_trace, sell_trace], rows=row, cols=1)
             layout_update_dict = {
@@ -307,16 +309,14 @@ class Dashboard:
         return tp_cnt, sl_cnt, time_balance_usedmargin_list
     
     @staticmethod
-    def draw_candles(candle_list: list[Candle], 
-                          analyst: Analyzable, 
-                          peak_set:set[Candle], 
-                          valley_set:set[Candle], 
-                          spread:Decimal, 
-                          draw_signal: bool = True):
-        signal_list = analyst.analyze(candle_list, peak_set, valley_set)
-        tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
-        shape_list = Dashboard._get_shapes(tran_list)
-        candle_trace, trend_trace, ema_trace, atr_trace, rsi_trace, buy_trace, sell_trace = Dashboard._get_traces(candle_list, signal_list, peak_set, valley_set)
+    def draw_candles(candle_list: list[Candle]):
+        peak_set, valley_set = get_peaks_valleys(candle_list)
+        candle_trace = Dashboard._get_candle_traces(candle_list)
+        trend_trace = Dashboard._get_trends_traces(candle_list, peak_set, valley_set)
+        ema_trace = Dashboard._get_ema_traces(candle_list)
+        atr_trace = Dashboard._get_atr_traces(candle_list)
+        rsi_trace = Dashboard._get_rsi_traces(candle_list)
+
         fig = make_subplots(rows=3, cols=1, shared_xaxes=True)
 
         # row 1
@@ -327,9 +327,49 @@ class Dashboard:
             plot_bgcolor='#151924',
             paper_bgcolor='#151924'
         )
-        if draw_signal:
-            fig.add_traces([buy_trace, sell_trace], rows=1, cols=1)
-            fig.update_layout(shapes=shape_list)
+
+        # row 2
+        fig.add_trace(atr_trace, row=2, col=1)
+        fig.update_layout(
+            xaxis2=dict(showgrid=False),
+            yaxis2=dict(showgrid=False, domain=[0.2, 0.4]),
+        )
+        # row 3
+        fig.add_trace(rsi_trace, row=3, col=1)
+        fig.update_layout(
+            xaxis3=dict(showgrid=False),
+            yaxis3=dict(showgrid=False, domain=[0, 0.2]),
+        )
+        fig.show()
+
+    @staticmethod
+    def draw_candles_with_signals(candle_list: list[Candle], 
+                          analyst: Analyzable,
+                          spread:Decimal):
+        peak_set, valley_set = get_peaks_valleys(candle_list)
+        signal_list = analyst.analyze(candle_list, peak_set, valley_set)
+        tran_list = Dashboard._get_trans(candle_list, signal_list, spread)
+        shape_list = Dashboard._get_shapes(tran_list)
+        candle_trace = Dashboard._get_candle_traces(candle_list)
+        trend_trace = Dashboard._get_trends_traces(candle_list, peak_set, valley_set)
+        ema_trace = Dashboard._get_ema_traces(candle_list)
+        atr_trace = Dashboard._get_atr_traces(candle_list)
+        rsi_trace = Dashboard._get_rsi_traces(candle_list)
+        buy_trace = Dashboard._get_buy_signals_traces(candle_list, signal_list)
+        sell_trace = Dashboard._get_sell_signals_traces(candle_list, signal_list)
+        
+        fig = make_subplots(rows=3, cols=1, shared_xaxes=True)
+
+        # row 1
+        fig.add_traces([candle_trace, trend_trace, ema_trace], rows=1, cols=1)
+        fig.update_layout(
+            xaxis=dict(showgrid=False, rangeslider=dict(visible=False)),
+            yaxis=dict(showgrid=False, domain=[0.4, 1]),
+            plot_bgcolor='#151924',
+            paper_bgcolor='#151924'
+        )
+        fig.add_traces([buy_trace, sell_trace], rows=1, cols=1)
+        fig.update_layout(shapes=shape_list)
 
         # row 2
         fig.add_trace(atr_trace, row=2, col=1)
@@ -359,10 +399,7 @@ class Dashboard:
         print(f'\n{summ_str}')
 
     @staticmethod
-    def _get_traces(candle_list: list[Candle],
-                    signal_list: list[Signal],
-                    peak_set:set[Candle],
-                    valley_set:set[Candle]) -> tuple:
+    def _get_candle_traces(candle_list: list[Candle]):
         df = pd.DataFrame(dict(
             st=[c.strtime for c in candle_list],
             o=[c.o for c in candle_list],
@@ -381,14 +418,29 @@ class Dashboard:
             increasing=dict(line=dict(color=green, width=1), fillcolor=green),
             decreasing=dict(line=dict(color=red, width=1), fillcolor=red)
         )
+        return candle_trace
+    
+    @staticmethod
+    def _get_ema_traces(candle_list: list[Candle]):
         #draw ema
         blue = '#2962FF'
-        emas = get_emas(list(df.c), win=60)
+        ema_list = get_emas([c.c for c in candle_list], win=60)
         ema_trace = go.Scatter(
-            x=df.st,
-            y=emas,
+            x=[c.strtime for c in candle_list],
+            y=ema_list,
             line=dict(width=1, color=blue)
         )
+        return ema_trace
+    
+    @staticmethod
+    def _get_atr_traces(candle_list: list[Candle]):
+        df = pd.DataFrame(dict(
+            st=[c.strtime for c in candle_list],
+            o=[c.o for c in candle_list],
+            h=[c.h for c in candle_list],
+            l=[c.l for c in candle_list],
+            c=[c.c for c in candle_list]
+        ))
         #draw atr
         atr_list = get_atrs(list(df.h), list(df.l), list(df.c), win=14)
         atr_trace = go.Scatter(
@@ -396,14 +448,24 @@ class Dashboard:
             y=atr_list,
             line=dict(width=1, color='rgba(8, 153, 129, 1)')
         )
+        return atr_trace
+
+    @staticmethod
+    def _get_rsi_traces(candle_list: list[Candle]):
         #draw rsi
-        rsi_list = get_rsis(list(df.c), win=7)
+        rsi_list = get_rsis([candle.c for candle in candle_list], win=7)
         rsi_trace = go.Scatter(
-            x=df.st,
+            x=[candle.strtime for candle in candle_list],
             y=rsi_list,
             line=dict(width=1, color='rgba(8, 153, 129, 1)')
         )
-
+        # draw signals's tp and sl transactions
+        return rsi_trace
+    
+    @staticmethod
+    def _get_trends_traces(candle_list: list[Candle],
+                    peak_set:set[Candle],
+                    valley_set:set[Candle]):
         #draw trends
         peak_valley_set = {*peak_set, *valley_set}
         trend_trace = go.Scatter(
@@ -411,6 +473,26 @@ class Dashboard:
             y=[c.c for c in candle_list if c in peak_valley_set],
             line=dict(width=1, color='rgba(41, 98, 255, 0.5)')
         )
+        # draw signals's tp and sl transactions
+        return trend_trace
+    
+    @staticmethod
+    def _get_sell_signals_traces(candle_list: list[Candle],
+                    signal_list: list[Signal]):
+        # draw sell signals
+        sell_sec_set = set([s.candle_sec for s in signal_list if not s.is_buy])
+        sell_candle_list = [c for c in candle_list if c.open_sec in sell_sec_set]
+        sell_trace = go.Scatter(
+            x=[c.strtime for c in sell_candle_list],
+            y=[c.c for c in sell_candle_list],
+            mode='markers',
+            marker=dict(size=10, color=yellow, symbol='triangle-down')
+        )
+        return sell_trace
+    
+    @staticmethod
+    def _get_buy_signals_traces(candle_list: list[Candle],
+                    signal_list: list[Signal]):
         # draw buy signals
         yellow = '#ffff3f'
         buy_sec_set = set([s.candle_sec for s in signal_list if s.is_buy])
@@ -421,17 +503,7 @@ class Dashboard:
             mode='markers',
             marker=dict(size=10, color=yellow, symbol='triangle-up')
         )
-        # draw sell signals
-        sell_sec_set = set([s.candle_sec for s in signal_list if not s.is_buy])
-        sell_candle_list = [c for c in candle_list if c.open_sec in sell_sec_set]
-        sell_trace = go.Scatter(
-            x=[c.strtime for c in sell_candle_list],
-            y=[c.c for c in sell_candle_list],
-            mode='markers',
-            marker=dict(size=10, color=yellow, symbol='triangle-down')
-        )
-        # draw signals's tp and sl transactions
-        return candle_trace, trend_trace, ema_trace, atr_trace, rsi_trace, buy_trace, sell_trace
+        return buy_trace
 
     @staticmethod
     def summarize(candle_list: list[Candle],
