@@ -307,7 +307,7 @@ class Dashboard:
         return tp_cnt, sl_cnt, time_balance_usedmargin_list
     
     @staticmethod
-    def draw_candle_chart(candle_list: list[Candle], 
+    def draw_candles(candle_list: list[Candle], 
                           analyst: Analyzable, 
                           peak_set:set[Candle], 
                           valley_set:set[Candle], 
