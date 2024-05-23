@@ -14,3 +14,6 @@ class Signal:
         self.sl = sl
         self.tp = tp
         self.symstr = symstr
+
+    def __str__(self) -> str:
+        return f"S(pr{self.price} sl{self.sl} tp{self.tp} sym{self.symstr})"
