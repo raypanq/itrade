@@ -44,3 +44,6 @@ class Candle:
     @property
     def is_down(self):
         return self.c < self.o
+    
+    def __str__(self) -> str:
+        return f"C(op{utc_date(self.open_sec)} sym{self.symstr} period{self.period} ohlc{self.o}, {self.h}, {self.l}, {self.c})"
