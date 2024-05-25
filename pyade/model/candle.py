@@ -1,4 +1,4 @@
-from .. import utc_date
+from ..common import utc_date
 from decimal import Decimal
 from . import SymbolStr,CandlePeriod
 
