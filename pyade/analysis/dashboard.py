@@ -5,7 +5,7 @@ from plotly.subplots import make_subplots
 from decimal import Decimal
 import pandas as pd
 from . import FeeCalculable, Analyzable, get_rsis, get_emas, get_atrs, get_peaks_valleys
-from .. import utc_date, trunc
+from ..common import utc_date, trunc
 from ..model import SymbolStr
 from functools import reduce
 
@@ -480,6 +480,7 @@ class Dashboard:
     def _get_sell_signals_traces(candle_list: list[Candle],
                     signal_list: list[Signal]):
         # draw sell signals
+        yellow = '#ffff3f'
         sell_sec_set = set([s.candle_sec for s in signal_list if not s.is_buy])
         sell_candle_list = [c for c in candle_list if c.open_sec in sell_sec_set]
         sell_trace = go.Scatter(
