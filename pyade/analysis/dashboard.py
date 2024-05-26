@@ -571,18 +571,18 @@ class Dashboard:
         return shape_list
 
     @staticmethod
-    def _get_trans(candle_list: list[Candle],
-                   signal_list: list[Signal],
+    def _get_trans(candles: list[Candle],
+                   signals: list[Signal],
                    spread:Decimal) -> list[_Transaction]:
         # 同一个 symbol period 的一根蜡烛，不会同时 buy 和 sell 信号出现， 一个 open_sec 确实只应该出现一个信号
-        signal_dict = {signal.candle_sec: signal for signal in signal_list}
+        signal_dict = {signal.candle_sec: signal for signal in signals}
         pending_signal_set = set()
         tran_list: list[_Transaction] = []
-        symstr = candle_list[0].symstr
+        symstr = candles[0].symstr
         spread_price = spread/(100 if symstr.quote == 'jpy' else pow(10, 4))
         # candle's price actually is middle of ask/bid. so use half spread to calc
         half_spread_price = spread_price/2
-        for candle in candle_list:
+        for candle in candles:
             rm_list = []
             for ps in pending_signal_set:
                 tran = _Transaction(from_candle_open_sec=ps.candle_sec,
