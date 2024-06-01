@@ -25,7 +25,7 @@ setup(
     description='itrade contains backtest, trade tools',
     long_description="",
     long_description_content_type='text/markdown',  # This is important!
-    url='https://github.com/raypanq/pyade_py',
+    url='https://github.com/raypanq/tradepy',
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.org/classifiers/
