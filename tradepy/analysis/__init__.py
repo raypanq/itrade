@@ -153,7 +153,10 @@ def get_me_to_prev_valley(candles: list[Candle],
         if candle in valleys:
             break
         i -= 1
-    return up_trends
+    if me.c > up_trends[-1].c:
+        return up_trends
+    else:
+        return []
 
 def get_me_to_prev_peak(candles: list[Candle],
                     me_idx: int,
@@ -167,4 +170,7 @@ def get_me_to_prev_peak(candles: list[Candle],
         if candle in peaks:
             break
         i -= 1
-    return down_trends
+    if me.c < down_trends[-1].c:
+        return down_trends
+    else:
+        return []
